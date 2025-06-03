@@ -1,10 +1,13 @@
+const fs = require('fs') // Required for reading the certificate and key files
+let options = { key: fs.readFileSync("/opt/intergram/key.pem"), cert: fs.readFileSync("/opt/intergram/bundle.crt") };
+
 const request = require('request');
 const compression = require('compression');
 const cors = require('cors');
 const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
-const http = require('http').Server(app);
+const http = require ('https').Server(options,app);
 const io = require('socket.io')(http);
 
 app.use(express.static('dist', {index: 'demo.html', maxage: '4h'}));
@@ -89,8 +92,9 @@ app.post('/usage-end', cors(), function(req, res) {
     res.end();
 });
 
-http.listen(process.env.PORT || 3000, function(){
-    console.log('listening on port:' + (process.env.PORT || 3000));
+http.listen(process.env.PORT || 8443, function(){
+    console.log('listening on port:' + (process.env.PORT || 8443));
+    console.log(process.env.TELEGRAM_TOKEN);
 });
 
 app.get("/.well-known/acme-challenge/:content", (req, res) => {
